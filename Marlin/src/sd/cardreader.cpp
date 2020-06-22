@@ -28,11 +28,6 @@
 
 #include "../MarlinCore.h"
 #include "../lcd/ultralcd.h"
-
-#if ENABLED(DWIN_CREALITY_LCD)
-  #include "../lcd/dwin/dwin.h"
-#endif
-
 #include "../module/planner.h"        // for synchronize
 #include "../module/printcounter.h"
 #include "../gcode/queue.h"
@@ -185,7 +180,7 @@ int CardReader::countItems(SdFile dir) {
   while (dir.readDir(&p, longFilename) > 0)
     c += is_dir_or_gcode(p);
 
-  #if ALL(SDCARD_SORT_ALPHA, SDSORT_USES_RAM, SDSORT_CACHE_NAMES)
+  #if ENABLED(SDCARD_SORT_ALPHA) && SDSORT_USES_RAM && SDSORT_CACHE_NAMES
     nrFiles = c;
   #endif
 
@@ -390,11 +385,7 @@ void CardReader::mount() {
 void CardReader::manage_media() {
   static uint8_t prev_stat = TERN(INIT_SDCARD_ON_BOOT, 2, 0);
   uint8_t stat = uint8_t(IS_SD_INSERTED());
-  if (stat == prev_stat) return;
-
-  flag.workDirIsRoot = true;          // Return to root on mount/release
-
-  if (ui.detected()) {
+  if (stat != prev_stat && ui.detected()) {
 
     uint8_t old_stat = prev_stat;
     prev_stat = stat;                 // Change now to prevent re-entry
@@ -429,10 +420,6 @@ void CardReader::manage_media() {
 void CardReader::release() {
   endFilePrint();
   flag.mounted = false;
-  flag.workDirIsRoot = true;
-  #if ALL(SDCARD_SORT_ALPHA, SDSORT_USES_RAM, SDSORT_CACHE_NAMES)
-    nrFiles = 0;
-  #endif
 }
 
 void CardReader::openAndPrintFile(const char *name) {
@@ -453,7 +440,6 @@ void CardReader::startFileprint() {
 
 void CardReader::endFilePrint(TERN_(SD_RESORT, const bool re_sort/*=false*/)) {
   TERN_(ADVANCED_PAUSE_FEATURE, did_pause_print = 0);
-  TERN_(DWIN_CREALITY_LCD, HMI_flag.print_finish = flag.sdprinting);
   flag.sdprinting = flag.abort_sd_printing = false;
   if (isFileOpen()) file.close();
   TERN_(SD_RESORT, if (re_sort) presort());
@@ -958,7 +944,7 @@ void CardReader::cdroot() {
             #if HAS_FOLDER_SORTING
               const uint16_t bit = i & 0x07, ind = i >> 3;
               if (bit == 0) isDir[ind] = 0x00;
-              if (flag.filenameIsDir) SBI(isDir[ind], bit);
+              if (flag.filenameIsDir) isDir[ind] |= _BV(bit);
             #endif
           #endif
         }
@@ -986,7 +972,7 @@ void CardReader::cdroot() {
             #if HAS_FOLDER_SORTING
               #if ENABLED(SDSORT_USES_RAM)
                 // Folder sorting needs an index and bit to test for folder-ness.
-                #define _SORT_CMP_DIR(fs) (IS_DIR(o1) == IS_DIR(o2) ? _SORT_CMP_NODIR() : IS_DIR(fs > 0 ? o1 : o2))
+                #define _SORT_CMP_DIR(fs) IS_DIR(o1) == IS_DIR(o2) ? _SORT_CMP_NODIR() : IS_DIR(fs > 0 ? o1 : o2)
               #else
                 #define _SORT_CMP_DIR(fs) ((dir1 == flag.filenameIsDir) ? _SORT_CMP_NODIR() : (fs > 0 ? dir1 : !dir1))
               #endif
@@ -1076,14 +1062,13 @@ void CardReader::cdroot() {
 #endif // SDCARD_SORT_ALPHA
 
 uint16_t CardReader::get_num_Files() {
-  if (!isMounted()) return 0;
-  return (
-    #if ALL(SDCARD_SORT_ALPHA, SDSORT_USES_RAM, SDSORT_CACHE_NAMES)
+  return
+    #if ENABLED(SDCARD_SORT_ALPHA) && SDSORT_USES_RAM && SDSORT_CACHE_NAMES
       nrFiles // no need to access the SD card for filenames
     #else
       countFilesInWorkDir()
     #endif
-  );
+  ;
 }
 
 //
@@ -1099,7 +1084,9 @@ void CardReader::fileHasFinished() {
     startFileprint();
   }
   else {
-    endFilePrint(TERN_(SD_RESORT, true));
+    endFilePrint();
+
+    TERN_(SDCARD_SORT_ALPHA, presort());
 
     marlin_state = MF_SD_COMPLETE;
   }

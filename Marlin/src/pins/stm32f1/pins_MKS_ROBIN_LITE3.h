@@ -115,6 +115,8 @@
     #define DOGLCD_SCK                      PB13
     #define DOGLCD_MOSI                     PB15
 
+    // Required for MKS_MINI_12864 with this board
+    #define MKS_LCD12864B
     #undef SHOW_BOOTSCREEN
 
   #else                                           // !MKS_MINI_12864

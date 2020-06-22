@@ -27,10 +27,6 @@
   #include "../libs/buzzer.h"
 #endif
 
-#if ENABLED(SDSUPPORT)
-  #include "../sd/cardreader.h"
-#endif
-
 #if EITHER(HAS_LCD_MENU, ULTIPANEL_FEEDMULTIPLY)
   #define HAS_ENCODER_ACTION 1
 #endif
@@ -115,7 +111,7 @@
 
   #endif // HAS_LCD_MENU
 
-#endif // HAS_SPI_LCD
+#endif
 
 // REPRAPWORLD_KEYPAD (and ADC_KEYPAD)
 #if ENABLED(REPRAPWORLD_KEYPAD)
@@ -291,13 +287,9 @@ public:
     static void init_lcd();
     FORCE_INLINE static void refresh() { refresh(LCDVIEW_CLEAR_CALL_REDRAW); }
   #else
-    #if ENABLED(DWIN_CREALITY_LCD)
-      static void refresh();
-    #else
-      static inline void refresh()  {}
-    #endif
     static inline bool detected() { return true; }
     static inline void init_lcd() {}
+    static inline void refresh()  {}
   #endif
 
   #if HAS_DISPLAY
@@ -459,16 +451,6 @@ public:
 
   #endif
 
-  #if ENABLED(SDSUPPORT)
-    #if BOTH(SCROLL_LONG_FILENAMES, HAS_LCD_MENU)
-      #define MARLINUI_SCROLL_NAME 1
-    #endif
-    #if MARLINUI_SCROLL_NAME
-      static uint8_t filename_scroll_pos, filename_scroll_max;
-    #endif
-    static const char * scrolled_filename(CardReader &theCard, const uint8_t maxlen, uint8_t hash, const bool doScroll);
-  #endif
-
   #if HAS_LCD_MENU
 
     #if ENABLED(TOUCH_BUTTONS)
@@ -480,6 +462,13 @@ public:
       static bool encoderRateMultiplierEnabled;
       static millis_t lastEncoderMovementMillis;
       static void enable_encoder_multiplier(const bool onoff);
+    #endif
+
+    #if ENABLED(SDSUPPORT)
+      #if ENABLED(SCROLL_LONG_FILENAMES)
+        static uint8_t filename_scroll_pos, filename_scroll_max;
+      #endif
+      static const char * scrolled_filename(CardReader &theCard, const uint8_t maxlen, uint8_t hash, const bool doScroll);
     #endif
 
     #if IS_KINEMATIC
