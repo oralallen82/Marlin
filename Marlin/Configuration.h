@@ -751,7 +751,7 @@
  * Override with M92
  *                                      X, Y, Z, E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 79.44, 79.32, 395.55, 97.29 } //OA
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 79.44, 79.32, 399.55, 97.29 } //OA
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -2261,7 +2261,7 @@
   //#define NEOPIXEL2_PIN    5
   #define NEOPIXEL_PIXELS 3       // Number of LEDs in the strip, larger of 2 strips if 2 neopixel strips are used
   //#define NEOPIXEL_IS_SEQUENTIAL   // Sequential display for temperature change - LED by LED. Disable to change all LEDs at once.
-  #define NEOPIXEL_BRIGHTNESS 127  // Initial brightness (0-255)
+  #define NEOPIXEL_BRIGHTNESS 70  // Initial brightness (0-255)
   #define NEOPIXEL_STARTUP_TEST  // Cycle through colors at startup
 
   // Use a single Neopixel LED for static (background) lighting
