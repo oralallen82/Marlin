@@ -142,7 +142,7 @@ const char str_t_thermal_runaway[] PROGMEM = STR_T_THERMAL_RUNAWAY,
 
 #if HAS_HOTEND
   hotend_info_t Temperature::temp_hotend[HOTEND_TEMPS]; // = { 0 }
-  const int16_t Temperature::heater_maxtemp[HOTENDS] = ARRAY_BY_HOTENDS(HEATER_0_MAXTEMP, HEATER_1_MAXTEMP, HEATER_2_MAXTEMP, HEATER_3_MAXTEMP, HEATER_4_MAXTEMP, HEATER_5_MAXTEMP, HEATER_6_MAXTEMP, HEATER_7_MAXTEMP);
+  const uint16_t Temperature::heater_maxtemp[HOTENDS] = ARRAY_BY_HOTENDS(HEATER_0_MAXTEMP, HEATER_1_MAXTEMP, HEATER_2_MAXTEMP, HEATER_3_MAXTEMP, HEATER_4_MAXTEMP, HEATER_5_MAXTEMP, HEATER_6_MAXTEMP, HEATER_7_MAXTEMP);
 #endif
 
 #if ENABLED(AUTO_POWER_E_FANS)
@@ -342,7 +342,7 @@ volatile bool Temperature::raw_temps_ready = false;
 
 #if HAS_ADC_BUTTONS
   uint32_t Temperature::current_ADCKey_raw = HAL_ADC_RANGE;
-  uint8_t Temperature::ADCKey_count = 0;
+  uint16_t Temperature::ADCKey_count = 0;
 #endif
 
 #if ENABLED(PID_EXTRUSION_SCALING)
@@ -3082,7 +3082,13 @@ void Temperature::tick() {
       } while (wait_for_heatup && TEMP_CONDITIONS);
 
       if (wait_for_heatup) {
-        ui.reset_status();
+        #if ENABLED(DWIN_CREALITY_LCD)
+          HMI_flag.heat_flag = 0;
+          duration_t elapsed = print_job_timer.duration();  // print timer
+          dwin_heat_time = elapsed.value;
+        #else
+          ui.reset_status();
+        #endif
         TERN_(PRINTER_EVENT_LEDS, printerEventLEDs.onHeatingDone());
       }
 

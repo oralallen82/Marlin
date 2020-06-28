@@ -59,6 +59,22 @@
 #include "gcode/parser.h"
 #include "gcode/queue.h"
 
+#if ENABLED(TFT_LITTLE_VGL_UI)
+  #include "lvgl.h"
+  #include "lcd/extui/lib/mks_ui/tft_lvgl_configuration.h"
+  #include "lcd/extui/lib/mks_ui/draw_ui.h"
+#endif
+
+#if ENABLED(DWIN_CREALITY_LCD)
+  #include "lcd/dwin/dwin.h"
+  #include "lcd/dwin/dwin_lcd.h"
+  #include "lcd/dwin/rotary_encoder.h"
+#endif
+
+#if ENABLED(IIC_BL24CXX_EEPROM)
+  #include "lcd/dwin/eeprom_BL24CXX.h"
+#endif
+
 #if ENABLED(DIRECT_STEPPING)
   #include "feature/direct_stepping.h"
 #endif
@@ -837,7 +853,7 @@ void setup() {
   #if ENABLED(MARLIN_DEV_MODE)
     auto log_current_ms = [&](PGM_P const msg) {
       SERIAL_ECHO_START();
-      SERIAL_CHAR('['); SERIAL_ECHO(millis()); SERIAL_ECHO("] ");
+      SERIAL_CHAR('['); SERIAL_ECHO(millis()); SERIAL_ECHOPGM("] ");
       serialprintPGM(msg);
       SERIAL_EOL();
     };

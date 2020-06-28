@@ -1941,6 +1941,8 @@
 // IMPORTANT: The U8glib library is required for Graphical Display!
 //            https://github.com/olikraus/U8glib_Arduino
 //
+// NOTE: If the LCD is unresponsive you may need to reverse the plugs.
+//
 
 //
 // RepRapDiscount FULL GRAPHIC Smart Controller
@@ -2127,6 +2129,10 @@
 // Sources should be installed in 'src/lcd/extensible_ui'.
 //
 //#define EXTENSIBLE_UI
+
+#if ENABLED(EXTENSIBLE_UI)
+  //#define EXTUI_LOCAL_BEEPER // Enables use of local Beeper pin with external display
+#endif
 
 //=============================================================================
 //=============================== Graphical TFTs ==============================
