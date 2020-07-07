@@ -460,7 +460,7 @@
 // Above this temperature the heater will be switched off.
 // This can protect components from overheating, but NOT from shorts and failures.
 // (Use MINTEMP for thermistor short/failure protection.)
-#define HEATER_0_MAXTEMP 275
+#define HEATER_0_MAXTEMP 325
 #define HEATER_1_MAXTEMP 275
 #define HEATER_2_MAXTEMP 275
 #define HEATER_3_MAXTEMP 275
@@ -492,9 +492,9 @@
 
   // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
   // Creality Ender-3
-  #define DEFAULT_Kp 21.73
-  #define DEFAULT_Ki 1.54
-  #define DEFAULT_Kd 76.55
+  #define DEFAULT_Kp 28.38 //21.73
+  #define DEFAULT_Ki 2.77 //1.54
+  #define DEFAULT_Kd 72.79 //76.55
 
   // Ultimaker
   //#define DEFAULT_Kp 22.2
@@ -987,7 +987,7 @@
  *
  * Specify a Probe position as { X, Y, Z }
  */
-#define NOZZLE_TO_PROBE_OFFSET { -46, -12, -2.09} //OA Z -1.60 Glass Bed
+#define NOZZLE_TO_PROBE_OFFSET { -46, -12, -1.82} //OA Z -1.60 Glass Bed
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
