@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -23,7 +23,10 @@
 
 #include "xpt2046.h"
 #include "../../inc/MarlinConfig.h"
-#include "../../lcd/dogm/ultralcd_DOGM.h" // for LCD_FULL_PIXEL_WIDTH, etc.
+#if ENABLED(FSMC_GRAPHICAL_TFT)
+  #include "../../lcd/dogm/ultralcd_DOGM.h" // for LCD_FULL_PIXEL_WIDTH, etc.
+#endif
+
 
 // Touch screen resolution independent of display resolution
 #define TOUCH_SCREEN_HEIGHT 240
@@ -53,7 +56,6 @@
 #endif
 
 XPT2046 touch;
-extern int8_t encoderDiff;
 
 void XPT2046::init() {
   SET_INPUT(TOUCH_MISO_PIN);

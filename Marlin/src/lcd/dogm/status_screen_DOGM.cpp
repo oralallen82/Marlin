@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  */
 
@@ -101,6 +101,63 @@
 #if DO_DRAW_HOTENDS
   #define MAX_HOTEND_DRAW _MIN(HOTENDS, ((LCD_PIXEL_WIDTH - (STATUS_LOGO_BYTEWIDTH + STATUS_FAN_BYTEWIDTH) * 8) / (STATUS_HEATERS_XSPACE)))
   #define STATUS_HEATERS_BOT (STATUS_HEATERS_Y + STATUS_HEATERS_HEIGHT - 1)
+#endif
+
+#if HAS_POWER_MONITOR
+
+  void display_power_monitor(const uint8_t x, const uint8_t y) {
+
+    lcd_moveto(x, y);
+
+    #if HAS_POWER_MONITOR_WATTS
+      const bool wflag = power_monitor.power_display_enabled();
+    #endif
+    #if ENABLED(POWER_MONITOR_CURRENT)
+      const bool iflag = power_monitor.current_display_enabled();
+    #endif
+    #if HAS_POWER_MONITOR_VREF
+      const bool vflag = power_monitor.voltage_display_enabled();
+    #endif
+
+    #if HAS_POWER_MONITOR_WATTS
+      // Cycle between current, voltage, and power
+      if (ELAPSED(millis(), power_monitor.display_item_ms)) {
+        power_monitor.display_item_ms = millis() + 1000UL;
+        ++power_monitor.display_item;
+      }
+    #elif ENABLED(POWER_MONITOR_CURRENT)
+      power_monitor.display_item = 0;
+    #elif HAS_POWER_MONITOR_VREF
+      power_monitor.display_item = 1;
+    #endif
+
+    // ensure we have the right one selected for display
+    for (uint8_t i = 0; i < 3; i++) {
+      #if ENABLED(POWER_MONITOR_CURRENT)
+        if (power_monitor.display_item == 0 && !iflag) ++power_monitor.display_item;
+      #endif
+      #if HAS_POWER_MONITOR_VREF
+        if (power_monitor.display_item == 1 && !vflag) ++power_monitor.display_item;
+      #endif
+      #if HAS_POWER_MONITOR_WATTS
+        if (power_monitor.display_item == 2 && !wflag) ++power_monitor.display_item;
+      #endif
+      if (power_monitor.display_item >= 3) power_monitor.display_item = 0;
+    }
+
+    switch (power_monitor.display_item) {
+      #if ENABLED(POWER_MONITOR_CURRENT)                // Current
+        case 0: if (iflag) power_monitor.draw_current(); break;
+      #endif
+      #if HAS_POWER_MONITOR_VREF                        // Voltage
+        case 1: if (vflag) power_monitor.draw_voltage(); break;
+      #endif
+      #if HAS_POWER_MONITOR_WATTS                       // Power
+        case 2: if (wflag) power_monitor.draw_power(); break;
+      #endif
+      default: break;
+    }
+  }
 #endif
 
 #define PROGRESS_BAR_X 54

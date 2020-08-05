@@ -76,6 +76,7 @@ jobs:
         - rumba32
         - mks_robin_pro
         - STM32F103RET6_creality
+        - LERDGEX
 
         # Put lengthy tests last
 
@@ -104,7 +105,7 @@ jobs:
 
     - name: Install PlatformIO
       run: |
-        pip install -U https://github.com/platformio/platformio-core/archive/master.zip
+        pip install -U https://github.com/platformio/platformio-core/archive/develop.zip
         platformio update
 
     - name: Check out the PR
@@ -113,7 +114,6 @@ jobs:
     - name: Run ${{ matrix.test-platform }} Tests
       run: |
         # Inline tests script
-        [[ "$GITHUB_REPOSITORY" == "MarlinFirmware/Marlin" ]] || exit 0
         chmod +x buildroot/bin/*
         chmod +x buildroot/tests/*
         export PATH=./buildroot/bin/:./buildroot/tests/:${PATH}
