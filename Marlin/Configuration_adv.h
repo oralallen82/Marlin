@@ -2478,7 +2478,7 @@
     //#define Z3_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z4_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define SPI_ENDSTOPS              // TMC2130 only
-    //#define IMPROVE_HOMING_RELIABILITY
+    #define IMPROVE_HOMING_RELIABILITY //OA
   #endif
 
   /**
@@ -2491,7 +2491,7 @@
    *
    * Values from 0..1023, -1 to disable homing phase for that axis.
    */
-   //#define TMC_HOME_PHASE { 896, 896, 896 }
+   #define TMC_HOME_PHASE { 896, 896, -1 } //OA 896, 896, 896
 
   /**
    * Beta feature!
@@ -3126,7 +3126,7 @@
  *
  * Execute certain G-code commands immediately after power-on.
  */
-//#define STARTUP_COMMANDS "M17 Z"
+#define STARTUP_COMMANDS "M17 Z" //OA
 
 /**
  * G-code Macros
@@ -3180,9 +3180,9 @@
  * Host Prompt Support enables Marlin to use the host for user prompts so
  * filament runout and other processes can be managed from the host side.
  */
-//#define HOST_ACTION_COMMANDS
-#if ENABLED(HOST_ACTION_COMMANDS)
-  //#define HOST_PROMPT_SUPPORT
+#define HOST_ACTION_COMMANDS //OA
+#if ENABLED(HOST_ACTION_COMMANDS) 
+  #define HOST_PROMPT_SUPPORT //OA
 #endif
 
 /**
