@@ -46,6 +46,9 @@
 #endif
 
 #include "../../lcd/ultralcd.h"
+#if ENABLED(DWIN_CREALITY_LCD)
+  #include "../../lcd/dwin/e3v2/dwin.h"
+#endif
 
 #if HAS_L64XX                         // set L6470 absolute position registers to counts
   #include "../../libs/L64XX/L64XX_Marlin.h"
@@ -189,13 +192,14 @@
  *  X   Home to the X endstop
  *  Y   Home to the Y endstop
  *  Z   Home to the Z endstop
- *
  */
 void GcodeSuite::G28() {
   DEBUG_SECTION(log_G28, "G28", DEBUGGING(LEVELING));
   if (DEBUGGING(LEVELING)) log_machine_info();
 
   TERN_(LASER_MOVE_G28_OFF, cutter.set_inline_enabled(false));  // turn off laser
+
+  TERN_(DWIN_CREALITY_LCD, HMI_flag.home_flag = true);
 
   #if ENABLED(DUAL_X_CARRIAGE)
     bool IDEX_saved_duplication_state = extruder_duplication_enabled;
@@ -451,6 +455,8 @@ void GcodeSuite::G28() {
   #endif
 
   ui.refresh();
+
+  TERN_(DWIN_CREALITY_LCD, DWIN_CompletedHoming());
 
   report_current_position();
 

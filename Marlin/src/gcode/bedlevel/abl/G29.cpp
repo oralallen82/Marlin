@@ -60,6 +60,10 @@
   #include "../../../lcd/extui/ui_api.h"
 #endif
 
+#if ENABLED(DWIN_CREALITY_LCD)
+  #include "../../../lcd/dwin/e3v2/dwin.h"
+#endif
+
 #if HAS_MULTI_HOTEND
   #include "../../../module/tool_change.h"
 #endif
@@ -156,7 +160,6 @@
  *  E  By default G29 will engage the Z probe, test the bed, then disengage.
  *     Include "E" to engage/disengage the Z probe for each sample.
  *     There's no extra effect if you have a fixed Z probe.
- *
  */
 G29_TYPE GcodeSuite::G29() {
 
@@ -886,6 +889,10 @@ G29_TYPE GcodeSuite::G29() {
     if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR("Z Probe End Script: ", Z_PROBE_END_SCRIPT);
     planner.synchronize();
     process_subcommands_now_P(PSTR(Z_PROBE_END_SCRIPT));
+  #endif
+
+  #if ENABLED(DWIN_CREALITY_LCD)
+    DWIN_CompletedLeveling();
   #endif
 
   report_current_position();
