@@ -77,10 +77,6 @@
   #include "lcd/dwin/e3v2/rotary_encoder.h"
 #endif
 
-#if ENABLED(DWIN_CREALITY_TOUCHLCD)
-  #include "lcd/dwin/dwin_touch_lcd.h"
-#endif
-
 #if ENABLED(IIC_BL24CXX_EEPROM)
   #include "libs/BL24CXX.h"
 #endif
@@ -506,12 +502,7 @@ inline void manage_inactivity(const bool ignore_stepper_queue=false) {
   if (gcode.stepper_max_timed_out(ms)) {
     SERIAL_ERROR_START();
     SERIAL_ECHOLNPAIR(STR_KILL_INACTIVE_TIME, parser.command_ptr);
-
-    #if ENABLED(DWIN_CREALITY_TOUCHLCD)
-      DWINTouch_inactivity_callback();
-    #else
-      kill();
-    #endif
+    kill();
   }
 
   // M18 / M94 : Handle steppers inactive time timeout
@@ -752,23 +743,6 @@ void idle(TERN_(ADVANCED_PAUSE_FEATURE, bool no_stepper_sleep/*=false*/)) {
 
   // Handle UI input / draw events
   TERN(DWIN_CREALITY_LCD, DWIN_Update(), ui.update());
-  TERN_(DWIN_CREALITY_TOUCHLCD, DWINTouch_refresh());
-
-  #if ENABLED(FIX_MOUNTED_PROBE)
-    if((IS_SD_PRINTING() == true) && home_flag == false) //  printing and no homing
-    {
-      endstops.enable_z_probe(false);
-    }
-
-    if((0 == READ(OPTO_SWITCH_PIN)) && (home_flag == true))
-    {
-      endstops.enable_z_probe(true);
-      delay(100);
-      WRITE(COM_PIN, 0);
-      delay(200);
-      WRITE(COM_PIN, 1);
-    }
-  #endif
 
   // Run i2c Position Encoders
   #if ENABLED(I2C_POSITION_ENCODERS)
@@ -820,6 +794,10 @@ void kill(PGM_P const lcd_error/*=nullptr*/, PGM_P const lcd_component/*=nullptr
   #else
     UNUSED(lcd_error);
     UNUSED(lcd_component);
+  #endif
+
+  #if HAS_TFT_LVGL_UI
+    lv_draw_error_message(lcd_error);
   #endif
 
   #ifdef ACTION_ON_KILL
@@ -889,6 +867,57 @@ void stop() {
   }
 }
 
+inline void tmc_standby_setup() {
+  #if PIN_EXISTS(X_STDBY)
+    SET_INPUT_PULLDOWN(X_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(X2_STDBY)
+    SET_INPUT_PULLDOWN(X2_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(Y_STDBY)
+    SET_INPUT_PULLDOWN(Y_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(Y2_STDBY)
+    SET_INPUT_PULLDOWN(Y2_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(Z_STDBY)
+    SET_INPUT_PULLDOWN(Z_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(Z2_STDBY)
+    SET_INPUT_PULLDOWN(Z2_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(Z3_STDBY)
+    SET_INPUT_PULLDOWN(Z3_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(Z4_STDBY)
+    SET_INPUT_PULLDOWN(Z4_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(E0_STDBY)
+    SET_INPUT_PULLDOWN(E0_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(E1_STDBY)
+    SET_INPUT_PULLDOWN(E1_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(E2_STDBY)
+    SET_INPUT_PULLDOWN(E2_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(E3_STDBY)
+    SET_INPUT_PULLDOWN(E3_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(E4_STDBY)
+    SET_INPUT_PULLDOWN(E4_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(E5_STDBY)
+    SET_INPUT_PULLDOWN(E5_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(E6_STDBY)
+    SET_INPUT_PULLDOWN(E6_STDBY_PIN);
+  #endif
+  #if PIN_EXISTS(E7_STDBY)
+    SET_INPUT_PULLDOWN(E7_STDBY_PIN);
+  #endif
+}
+
 /**
  * Marlin entry-point: Set up before the program loop
  *  - Set up the kill pin, filament runout, power hold
@@ -909,6 +938,8 @@ void stop() {
  *    • Max7219
  */
 void setup() {
+
+  tmc_standby_setup();  // TMC Low Power Standby pins must be set early or they're not usable
 
   #if ENABLED(MARLIN_DEV_MODE)
     auto log_current_ms = [&](PGM_P const msg) {
@@ -934,16 +965,21 @@ void setup() {
     #endif
   #endif
 
-  #if NUM_SERIAL > 0
-    MYSERIAL0.begin(BAUDRATE);
-    uint32_t serial_connect_timeout = millis() + 1000UL;
-    while (!MYSERIAL0 && PENDING(millis(), serial_connect_timeout)) { /*nada*/ }
-    #if HAS_MULTI_SERIAL
-      MYSERIAL1.begin(BAUDRATE);
-      serial_connect_timeout = millis() + 1000UL;
-      while (!MYSERIAL1 && PENDING(millis(), serial_connect_timeout)) { /*nada*/ }
-    #endif
-    SERIAL_ECHO_MSG("start");
+  MYSERIAL0.begin(BAUDRATE);
+  uint32_t serial_connect_timeout = millis() + 1000UL;
+  while (!MYSERIAL0 && PENDING(millis(), serial_connect_timeout)) { /*nada*/ }
+  #if HAS_MULTI_SERIAL
+    MYSERIAL1.begin(BAUDRATE);
+    serial_connect_timeout = millis() + 1000UL;
+    while (!MYSERIAL1 && PENDING(millis(), serial_connect_timeout)) { /*nada*/ }
+  #endif
+  SERIAL_ECHO_MSG("start");
+
+  #if BOTH(HAS_TFT_LVGL_UI, USE_WIFI_FUNCTION)
+    mks_esp_wifi_init();
+    WIFISERIAL.begin(WIFI_BAUDRATE);
+    serial_connect_timeout = millis() + 1000UL;
+    while (/*!WIFISERIAL && */PENDING(millis(), serial_connect_timeout)) { /*nada*/ }
   #endif
 
   SETUP_RUN(HAL_init());
@@ -1036,7 +1072,7 @@ void setup() {
     DWIN_UpdateLCD();     // Show bootscreen (first image)
   #else
     SETUP_RUN(ui.init());
-    #if HAS_SPI_LCD && ENABLED(SHOW_BOOTSCREEN)
+    #if HAS_WIRED_LCD && ENABLED(SHOW_BOOTSCREEN)
       SETUP_RUN(ui.show_bootscreen());
     #endif
     SETUP_RUN(ui.reset_status());     // Load welcome message early. (Retained if no errors exist.)
@@ -1216,10 +1252,6 @@ void setup() {
     BL24CXX::init();
     const uint8_t err = BL24CXX::check();
     SERIAL_ECHO_TERNARY(err, "BL24CXX Check ", "failed", "succeeded", "!\n");
-  #endif
-
-  #if ENABLED(DWIN_CREALITY_TOUCHLCD)
-    SETUP_RUN(DWINTouch_init());
   #endif
 
   #if ENABLED(DWIN_CREALITY_LCD)
