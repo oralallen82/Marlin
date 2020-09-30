@@ -22,11 +22,7 @@
 
 #ifdef __STM32F1__
 
-<<<<<<< HEAD
-#include "../../inc/MarlinConfigPre.h"
-=======
 #include "../../inc/MarlinConfig.h"
->>>>>>> 2.0.x
 #include "MarlinSerial.h"
 #include <libmaple/usart.h>
 
@@ -57,12 +53,8 @@ static inline __always_inline void my_usart_irq(ring_buffer *rb, ring_buffer *wb
         rb_push_insert(rb, c);
       #endif
       #if ENABLED(EMERGENCY_PARSER)
-<<<<<<< HEAD
-        emergency_parser.update(serial.emergency_state, c);
-=======
         if (serial.emergency_parser_enabled())
           emergency_parser.update(serial.emergency_state, c);
->>>>>>> 2.0.x
       #endif
     }
   }
@@ -82,13 +74,6 @@ static inline __always_inline void my_usart_irq(ring_buffer *rb, ring_buffer *wb
   }
 }
 
-<<<<<<< HEAD
-#define DEFINE_HWSERIAL_MARLIN(name, n)  \
-  MarlinSerial name(USART##n,            \
-            BOARD_USART##n##_TX_PIN,     \
-            BOARD_USART##n##_RX_PIN);    \
-  extern "C" void __irq_usart##n(void) { \
-=======
 // Not every MarlinSerial port should handle emergency parsing.
 // It would not make sense to parse GCode from TMC responses, for example.
 constexpr bool serial_handles_emergency(int port) {
@@ -111,38 +96,11 @@ constexpr bool serial_handles_emergency(int port) {
             BOARD_USART##n##_RX_PIN,      \
             serial_handles_emergency(n)); \
   extern "C" void __irq_usart##n(void) {  \
->>>>>>> 2.0.x
     my_usart_irq(USART##n->rb, USART##n->wb, USART##n##_BASE, MSerial##n); \
   }
 
 #define DEFINE_HWSERIAL_UART_MARLIN(name, n) \
   MarlinSerial name(UART##n,                 \
-<<<<<<< HEAD
-            BOARD_USART##n##_TX_PIN,         \
-            BOARD_USART##n##_RX_PIN);        \
-  extern "C" void __irq_usart##n(void) {     \
-    my_usart_irq(USART##n->rb, USART##n->wb, USART##n##_BASE, MSerial##n); \
-  }
-
-#if SERIAL_PORT == 1 || SERIAL_PORT_2 == 1 || DGUS_SERIAL_PORT == 1
-  DEFINE_HWSERIAL_MARLIN(MSerial1, 1);
-#endif
-
-#if SERIAL_PORT == 2 || SERIAL_PORT_2 == 2 || DGUS_SERIAL_PORT == 2
-  DEFINE_HWSERIAL_MARLIN(MSerial2, 2);
-#endif
-
-#if SERIAL_PORT == 3 || SERIAL_PORT_2 == 3 || DGUS_SERIAL_PORT == 3
-  DEFINE_HWSERIAL_MARLIN(MSerial3, 3);
-#endif
-
-#if SERIAL_PORT == 4 || SERIAL_PORT_2 == 4 || DGUS_SERIAL_PORT == 4
-  DEFINE_HWSERIAL_UART_MARLIN(MSerial4, 4);
-#endif
-
-#if SERIAL_PORT == 5 || SERIAL_PORT_2 == 5 || DGUS_SERIAL_PORT == 5
-  DEFINE_HWSERIAL_UART_MARLIN(MSerial5, 5);
-=======
           BOARD_USART##n##_TX_PIN,           \
           BOARD_USART##n##_RX_PIN,           \
           serial_handles_emergency(n));      \
@@ -230,7 +188,6 @@ constexpr bool IsSerialClassAllowed(const HardwareSerial&) { return false; }
 #endif
 #if AXIS_HAS_HW_SERIAL(E7)
   CHECK_AXIS_SERIAL(E7);
->>>>>>> 2.0.x
 #endif
 
 #endif // __STM32F1__
