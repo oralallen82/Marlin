@@ -37,7 +37,6 @@ namespace FTDI {
     // split and still allow the ellipsis to fit.
     int16_t lineWidth = 0;
     char *breakPoint   = str;
-<<<<<<< HEAD
     for(char* c = str; *c; c++) {
       lineWidth += fm.get_char_width(*c);
       if(lineWidth + ellipsisWidth < w)
@@ -45,15 +44,6 @@ namespace FTDI {
     }
 
     if(lineWidth > w) {
-=======
-    for (char* c = str; *c; c++) {
-      lineWidth += fm.get_char_width(*c);
-      if (lineWidth + ellipsisWidth < w)
-        breakPoint = c;
-    }
-
-    if (lineWidth > w) {
->>>>>>> 2.0.x
       *breakPoint = '\0';
       strcpy_P(breakPoint,PSTR("..."));
     }

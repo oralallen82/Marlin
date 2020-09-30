@@ -389,7 +389,7 @@
 // LCDs and Controllers //
 //////////////////////////
 
-#if HAS_WIRED_LCD
+#if HAS_SPI_LCD
 
   //
   // LCD Display output pins
@@ -632,4 +632,4 @@
     #endif
   #endif // NEWPANEL
 
-#endif // HAS_WIRED_LCD
+#endif // HAS_SPI_LCD

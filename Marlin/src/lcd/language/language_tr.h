@@ -30,6 +30,7 @@
  * Bu çeviri dosyasındaki sorunlar ve düzeltmeler için iletişim;
  * Contact for issues and corrections in this translation file;
  * Yücel Temel - (info@elektromanyetix.com) - https://elektromanyetix.com/
+ *
  */
 
 #define DISPLAY_CHARSET_ISO10646_TR
