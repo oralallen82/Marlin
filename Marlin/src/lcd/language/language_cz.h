@@ -31,6 +31,7 @@
  * Translated by Petr Zahradnik, Computer Laboratory
  * Blog and video blog Zahradnik se bavi
  * https://www.zahradniksebavi.cz
+ *
  */
 
 #define DISPLAY_CHARSET_ISO10646_CZ

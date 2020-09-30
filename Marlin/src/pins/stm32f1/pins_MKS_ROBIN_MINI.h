@@ -25,7 +25,7 @@
  * MKS Robin mini (STM32F130VET6) board pin assignments
  */
 
-#if NOT_TARGET(__STM32F1__)
+#ifndef __STM32F1__
   #error "Oops! Select an STM32F1 board in 'Tools > Board.'"
 #elif HOTENDS > 1 || E_STEPPERS > 1
   #error "MKS Robin mini only supports 1 hotend / E-stepper. Comment out this line to continue."
@@ -126,7 +126,6 @@
 #define SDIO_SUPPORT
 #define SDIO_CLOCK                       4500000  // 4.5 MHz
 #define SD_DETECT_PIN                       PD12
-#define ONBOARD_SPI_DEVICE                     1  // SPI1
 #define ONBOARD_SD_CS_PIN                   PC11
 
 //

@@ -26,7 +26,7 @@
  * https://reprapworld.com/documentation/datasheet_ultratronics10_05.pdf
  */
 
-#if NOT_TARGET(ARDUINO_ARCH_SAM)
+#ifndef ARDUINO_ARCH_SAM
   #error "Oops! Select 'Arduino Due' in 'Tools > Board.'"
 #endif
 

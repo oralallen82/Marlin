@@ -622,7 +622,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 211: M211(); break;                                  // M211: Enable, Disable, and/or Report software endstops
       #endif
 
-      #if HAS_MULTI_EXTRUDER
+      #if EXTRUDERS > 1
         case 217: M217(); break;                                  // M217: Set filament swap parameters
       #endif
 

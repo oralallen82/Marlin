@@ -26,7 +26,7 @@
  * https://reprap.org/wiki/Alligator_Board
  */
 
-#if NOT_TARGET(__SAM3X8E__)
+#ifndef __SAM3X8E__
   #error "Oops! Select 'Arduino Due' in 'Tools > Board.'"
 #endif
 

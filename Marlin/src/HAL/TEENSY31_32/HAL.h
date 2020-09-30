@@ -49,14 +49,18 @@
   #define IS_TEENSY32 1
 #endif
 
-#define _MSERIAL(X) Serial##X
-#define MSERIAL(X) _MSERIAL(X)
-#define Serial0 Serial
+#define NUM_SERIAL 1
 
 #if SERIAL_PORT == -1
   #define MYSERIAL0 SerialUSB
-#elif WITHIN(SERIAL_PORT, 0, 3)
-  #define MYSERIAL0 MSERIAL(SERIAL_PORT)
+#elif SERIAL_PORT == 0
+  #define MYSERIAL0 Serial
+#elif SERIAL_PORT == 1
+  #define MYSERIAL0 Serial1
+#elif SERIAL_PORT == 2
+  #define MYSERIAL0 Serial2
+#elif SERIAL_PORT == 3
+  #define MYSERIAL0 Serial3
 #endif
 
 #define HAL_SERVO_LIB libServo

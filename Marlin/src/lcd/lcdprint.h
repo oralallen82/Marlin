@@ -34,7 +34,7 @@
 
 #include "../inc/MarlinConfig.h"
 
-#if HAS_MARLINUI_U8GLIB
+#if HAS_GRAPHICAL_LCD
 
   #include "dogm/u8g_fontutf8.h"
   typedef u8g_uint_t lcd_uint_t;

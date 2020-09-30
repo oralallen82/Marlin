@@ -32,6 +32,7 @@
  *     Selecting an LCD Display
  *     Version 2.1
  *     Issue Date: 2017-11-14
+ *
  */
 #define COMPUTE_REGS_FROM_DATASHEET \
     constexpr uint16_t Hoffset              = thfp + thb - 1; \

@@ -25,7 +25,7 @@
  * RADDS
  */
 
-#if NOT_TARGET(__SAM3X8E__)
+#ifndef __SAM3X8E__
   #error "Oops! Select 'Arduino Due' in 'Tools > Board.'"
 #endif
 
@@ -226,7 +226,7 @@
 //
 // LCD / Controller
 //
-#if HAS_WIRED_LCD
+#if HAS_SPI_LCD
 
   #if ENABLED(RADDS_DISPLAY)
 
@@ -287,7 +287,7 @@
 
   #endif // SPARK_FULL_GRAPHICS
 
-#endif // HAS_WIRED_LCD
+#endif // HAS_SPI_LCD
 
 #ifndef SDSS
   #define SDSS                                 4
