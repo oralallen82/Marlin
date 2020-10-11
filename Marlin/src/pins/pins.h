@@ -51,13 +51,6 @@
 
 #define HAS_FREE_AUX2_PINS !(BOTH(ULTRA_LCD, NEWPANEL) && ANY(PANEL_ONE, VIKI2, miniVIKI, MINIPANEL, REPRAPWORLD_KEYPAD))
 
-// Test the target within the included pins file
-#ifdef __MARLIN_DEPS__
-  #define NOT_TARGET(V...) 0
-#else
-  #define NOT_TARGET(V...) NONE(V)
-#endif
-
 //
 // RAMPS 1.3 / 1.4 - ATmega1280, ATmega2560
 //
@@ -148,7 +141,7 @@
 #elif MB(AZTEEG_X3_PRO)
   #include "ramps/pins_AZTEEG_X3_PRO.h"         // ATmega2560                             env:mega2560
 #elif MB(ULTIMAIN_2)
-  #include "ramps/pins_ULTIMAIN_2.h"            // ATmega2560                             env:mega2560ext
+  #include "ramps/pins_ULTIMAIN_2.h"            // ATmega2560                             env:mega2560
 #elif MB(FORMBOT_RAPTOR)
   #include "ramps/pins_FORMBOT_RAPTOR.h"        // ATmega2560                             env:mega2560
 #elif MB(FORMBOT_RAPTOR2)
@@ -164,7 +157,7 @@
 #elif MB(RL200)
   #include "ramps/pins_RL200.h"                 // ATmega2560                             env:mega2560
 #elif MB(BQ_ZUM_MEGA_3D)
-  #include "ramps/pins_BQ_ZUM_MEGA_3D.h"        // ATmega2560                             env:mega2560ext
+  #include "ramps/pins_BQ_ZUM_MEGA_3D.h"        // ATmega2560                             env:mega2560
 #elif MB(MAKEBOARD_MINI)
   #include "ramps/pins_MAKEBOARD_MINI.h"        // ATmega2560                             env:mega2560
 #elif MB(TRIGORILLA_13)
@@ -232,7 +225,7 @@
 #elif MB(CNCONTROLS_15)
   #include "mega/pins_CNCONTROLS_15.h"          // ATmega1280, ATmega2560                 env:mega1280 env:mega2560
 #elif MB(MIGHTYBOARD_REVE)
-  #include "mega/pins_MIGHTYBOARD_REVE.h"       // ATmega1280, ATmega2560                 env:mega1280 env:mega2560ext
+  #include "mega/pins_MIGHTYBOARD_REVE.h"       // ATmega1280, ATmega2560                 env:mega1280 env:mega2560
 #elif MB(CHEAPTRONIC)
   #include "mega/pins_CHEAPTRONIC.h"            // ATmega2560                             env:mega2560
 #elif MB(CHEAPTRONIC_V2)
@@ -260,7 +253,7 @@
 #elif MB(GT2560_V3_A20)
   #include "mega/pins_GT2560_V3_A20.h"          // ATmega2560                             env:mega2560
 #elif MB(EINSTART_S)
-  #include "mega/pins_EINSTART-S.h"             // ATmega1280, ATmega2560                 env:mega1280 env:mega2560ext
+  #include "mega/pins_EINSTART-S.h"             // ATmega1280, ATmega2560                 env:mega1280 env:mega2560
 #elif MB(WANHAO_ONEPLUS)
   #include "mega/pins_WANHAO_ONEPLUS.h"         // ATmega2560                             env:mega2560
 #elif MB(OVERLORD)
@@ -567,8 +560,6 @@
   #include "stm32f1/pins_CREALITY_V452.h"       // STM32F1                                env:STM32F103RET6_creality
 #elif MB(TRIGORILLA_PRO)
   #include "stm32f1/pins_TRIGORILLA_PRO.h"      // STM32F1                                env:trigorilla_pro
-#elif MB(FLY_MINI)
-  #include "stm32f1/pins_FLY_MINI.h"            // STM32F1                                env:FLY_MINI
 
 //
 // ARM Cortex-M4F

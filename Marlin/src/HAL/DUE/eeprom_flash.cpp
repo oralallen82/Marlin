@@ -61,7 +61,7 @@
 #define EEPROMSize     4096
 #define PagesPerGroup   128
 #define GroupCount        2
-#define PageSize        256U
+#define PageSize        256u
 
  /* Flash storage */
 typedef struct FLASH_SECTOR {

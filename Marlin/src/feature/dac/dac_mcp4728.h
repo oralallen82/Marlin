@@ -40,7 +40,7 @@
 #endif
 
 #ifndef lowByte
-  #define lowByte(w)  ((uint8_t) ((w) & 0xFF))
+  #define lowByte(w)  ((uint8_t) ((w) & 0xff))
 #endif
 
 #ifndef highByte
