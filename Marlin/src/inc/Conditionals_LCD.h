@@ -217,6 +217,28 @@
   #define LCD_WIDTH 16
   #define LCD_HEIGHT 2
 
+#elif EITHER(TFTGLCD_PANEL_SPI, TFTGLCD_PANEL_I2C)
+
+  #define IS_TFTGLCD_PANEL 1
+  #define IS_ULTIPANEL                      // Note that IS_ULTIPANEL leads to HAS_WIRED_LCD
+
+  #if ENABLED(SDSUPPORT) && DISABLED(LCD_PROGRESS_BAR)
+    #define LCD_PROGRESS_BAR
+  #endif
+  #if ENABLED(TFTGLCD_PANEL_I2C)
+    #define LCD_I2C_ADDRESS           0x27  // Must be equal to panel's I2C slave addres
+  #endif
+  #define LCD_USE_I2C_BUZZER                // Enable buzzer on LCD, used for both I2C and SPI buses (LiquidTWI2 not required)
+  #define STD_ENCODER_PULSES_PER_STEP 2
+  #define STD_ENCODER_STEPS_PER_MENU_ITEM 1
+  #define LCD_WIDTH                   20    // 20 or 24 chars in line
+  #define LCD_HEIGHT                  10    // Character lines
+  #define LCD_CONTRAST_MIN            127
+  #define LCD_CONTRAST_MAX            255
+  #define DEFAULT_LCD_CONTRAST        250
+  #define CONVERT_TO_EXT_ASCII        // Use extended 128-255 symbols from ASCII table.
+                                      // At this time present conversion only for cyrillic - bg, ru and uk languages.
+                                      // First 7 ASCII symbols in panel font must be replaced with Marlin's special symbols.
 #endif
 
 #if ENABLED(IS_RRD_FG_SC)
@@ -578,10 +600,6 @@
   #define DO_SWITCH_EXTRUDER 1
 #endif
 
-#ifdef SWITCHING_NOZZLE_E1_SERVO_NR
-  #define SWITCHING_NOZZLE_TWO_SERVOS 1
-#endif
-
 /**
  * Default hotend offsets, if not defined
  */
@@ -632,14 +650,7 @@
   #ifndef Z_PROBE_SERVO_NR
     #define Z_PROBE_SERVO_NR 0
   #endif
-  #ifndef NUM_SERVOS
-    #define NUM_SERVOS (Z_PROBE_SERVO_NR + 1)
-  #endif
   #undef DEACTIVATE_SERVOS_AFTER_MOVE
-  #if NUM_SERVOS == 1
-    #undef SERVO_DELAY
-    #define SERVO_DELAY { 50 }
-  #endif
 
   // Always disable probe pin inverting for BLTouch
   #undef Z_MIN_PROBE_ENDSTOP_INVERTING
@@ -650,14 +661,10 @@
   #endif
 #endif
 
-#ifndef NUM_SERVOS
-  #define NUM_SERVOS 0
-#endif
-
 /**
  * Set a flag for a servo probe (or BLTouch)
  */
-#if defined(Z_PROBE_SERVO_NR) && Z_PROBE_SERVO_NR >= 0
+#ifdef Z_PROBE_SERVO_NR
   #define HAS_Z_SERVO_PROBE 1
 #endif
 #if ANY(HAS_Z_SERVO_PROBE, SWITCHING_EXTRUDER, SWITCHING_NOZZLE)
