@@ -24,7 +24,7 @@
 #include "watchdog.h"
 #include "math.h"
 
-#ifdef USBCON
+#ifdef IS_AT90USB
   #include <HardwareSerial.h>
 #else
   #define HardwareSerial_h // Hack to prevent HardwareSerial.h header inclusion
@@ -80,13 +80,8 @@ typedef int8_t pin_t;
 //extern uint8_t MCUSR;
 
 // Serial ports
-#ifdef USBCON
-  #if ENABLED(BLUETOOTH)
-    #define MYSERIAL0 bluetoothSerial
-  #else
-    #define MYSERIAL0 Serial
-  #endif
-  #define NUM_SERIAL 1
+#ifdef IS_AT90USB
+  #define MYSERIAL0 TERN(BLUETOOTH, bluetoothSerial, Serial)
 #else
   #if !WITHIN(SERIAL_PORT, -1, 3)
     #error "SERIAL_PORT must be from -1 to 3. Please update your configuration."

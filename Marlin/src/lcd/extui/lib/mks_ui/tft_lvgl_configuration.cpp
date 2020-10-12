@@ -561,4 +561,234 @@ bool my_touchpad_read(lv_indev_drv_t * indev_driver, lv_indev_data_t * data) {
   return false; // Return `false` since no data is buffering or left to read
 }
 
+int16_t enc_diff = 0;
+lv_indev_state_t state = LV_INDEV_STATE_REL;
+
+bool my_mousewheel_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data) {
+  (void) indev_drv;   /*Unused*/
+
+  data->state = state;
+  data->enc_diff = enc_diff;
+  enc_diff = 0;
+
+  return false;       /*No more data to read so return false*/
+}
+
+extern uint8_t currentFlashPage;
+
+//spi_flash
+uint32_t pic_read_base_addr = 0, pic_read_addr_offset = 0;
+lv_fs_res_t spi_flash_open_cb (lv_fs_drv_t * drv, void * file_p, const char * path, lv_fs_mode_t mode) {
+  static char last_path_name[30];
+  if (strcasecmp(last_path_name,path) != 0) {
+    pic_read_base_addr = lv_get_pic_addr((uint8_t *)path);
+    ZERO(last_path_name);
+    strcpy(last_path_name,path);
+  }
+  else {
+    W25QXX.init(SPI_QUARTER_SPEED);
+    currentFlashPage = 0;
+  }
+  pic_read_addr_offset = pic_read_base_addr;
+  return LV_FS_RES_OK;
+}
+
+lv_fs_res_t spi_flash_close_cb (lv_fs_drv_t * drv, void * file_p) {
+  lv_fs_res_t res = LV_FS_RES_OK;
+  /* Add your code here*/
+  pic_read_addr_offset = pic_read_base_addr;
+  return res;
+}
+
+lv_fs_res_t spi_flash_read_cb (lv_fs_drv_t * drv, void * file_p, void * buf, uint32_t btr, uint32_t * br) {
+  lv_pic_test((uint8_t *)buf, pic_read_addr_offset, btr);
+  *br = btr;
+  return LV_FS_RES_OK;
+}
+
+lv_fs_res_t spi_flash_seek_cb(lv_fs_drv_t * drv, void * file_p, uint32_t pos) {
+  #if HAS_SPI_FLASH_COMPRESSION
+    if (pos == 4) {
+      uint8_t bmp_header[4];
+      SPIFlash.beginRead(pic_read_base_addr);
+      SPIFlash.readData(bmp_header, 4);
+      currentFlashPage = 1;
+    }
+    pic_read_addr_offset = pic_read_base_addr;
+  #else
+    pic_read_addr_offset = pic_read_base_addr + pos;
+  #endif
+  return LV_FS_RES_OK;
+}
+
+lv_fs_res_t spi_flash_tell_cb(lv_fs_drv_t * drv, void * file_p, uint32_t * pos_p) {
+  *pos_p = pic_read_addr_offset - pic_read_base_addr;
+  return LV_FS_RES_OK;
+}
+
+//sd
+char *cur_namefff;
+uint32_t sd_read_base_addr = 0,sd_read_addr_offset = 0;
+lv_fs_res_t sd_open_cb (lv_fs_drv_t * drv, void * file_p, const char * path, lv_fs_mode_t mode) {
+  //cur_namefff = strrchr(path, '/');
+  char name_buf[100];
+  ZERO(name_buf);
+  strcat(name_buf,"/");
+  strcat(name_buf,path);
+  char *temp = strstr(name_buf,".bin");
+  if (temp) { strcpy(temp,".GCO"); }
+  sd_read_base_addr = lv_open_gcode_file((char *)name_buf);
+  sd_read_addr_offset = sd_read_base_addr;
+  if (sd_read_addr_offset == 0) return LV_FS_RES_NOT_EX;
+  return LV_FS_RES_OK;
+}
+
+lv_fs_res_t sd_close_cb (lv_fs_drv_t * drv, void * file_p) {
+  /* Add your code here*/
+  lv_close_gcode_file();
+  return LV_FS_RES_OK;
+}
+
+lv_fs_res_t sd_read_cb (lv_fs_drv_t * drv, void * file_p, void * buf, uint32_t btr, uint32_t * br) {
+  if (btr == 200) {
+    lv_gcode_file_read((uint8_t *)buf);
+    //pic_read_addr_offset += 208;
+    *br = 200;
+  }
+  else if (btr == 4) {
+    uint8_t header_pic[4] = { 0x04, 0x90, 0x81, 0x0C };
+    memcpy(buf, header_pic, 4);
+    //pic_read_addr_offset += 4;
+    *br = 4;
+  }
+  return LV_FS_RES_OK;
+}
+
+lv_fs_res_t sd_seek_cb(lv_fs_drv_t * drv, void * file_p, uint32_t pos) {
+  sd_read_addr_offset = sd_read_base_addr + (pos - 4) / 200 * 409;
+  lv_gcode_file_seek(sd_read_addr_offset);
+  return LV_FS_RES_OK;
+}
+
+lv_fs_res_t sd_tell_cb(lv_fs_drv_t * drv, void * file_p, uint32_t * pos_p) {
+  if (sd_read_addr_offset) *pos_p = 0;
+  else *pos_p = (sd_read_addr_offset - sd_read_base_addr) / 409 * 200 + 4;
+  return LV_FS_RES_OK;
+}
+
+void lv_encoder_pin_init() {
+  #if 1 // HAS_DIGITAL_BUTTONS
+
+    #if BUTTON_EXISTS(EN1)
+      SET_INPUT_PULLUP(BTN_EN1);
+    #endif
+    #if BUTTON_EXISTS(EN2)
+      SET_INPUT_PULLUP(BTN_EN2);
+    #endif
+    #if BUTTON_EXISTS(ENC)
+      SET_INPUT_PULLUP(BTN_ENC);
+    #endif
+
+    #if BUTTON_EXISTS(BACK)
+      SET_INPUT_PULLUP(BTN_BACK);
+    #endif
+
+    #if BUTTON_EXISTS(UP)
+      SET_INPUT(BTN_UP);
+    #endif
+    #if BUTTON_EXISTS(DWN)
+      SET_INPUT(BTN_DWN);
+    #endif
+    #if BUTTON_EXISTS(LFT)
+      SET_INPUT(BTN_LFT);
+    #endif
+    #if BUTTON_EXISTS(RT)
+      SET_INPUT(BTN_RT);
+    #endif
+
+  #endif // HAS_DIGITAL_BUTTONS
+}
+
+#if 1 // HAS_ENCODER_ACTION
+
+  //static const int8_t encoderDirection = 1;
+  //static int16_t enc_Direction;
+  void lv_update_encoder() {
+    static uint32_t encoder_time1;
+    uint32_t tmpTime, diffTime = 0;
+    tmpTime = millis();
+    diffTime = getTickDiff(tmpTime, encoder_time1);
+    if (diffTime > 50) {
+
+      #if HAS_ENCODER_WHEEL
+
+        #if ANY_BUTTON(EN1, EN2, ENC, BACK)
+
+          uint8_t newbutton = 0;
+
+          #if BUTTON_EXISTS(EN1)
+            if (BUTTON_PRESSED(EN1)) newbutton |= EN_A;
+          #endif
+          #if BUTTON_EXISTS(EN2)
+            if (BUTTON_PRESSED(EN2)) newbutton |= EN_B;
+          #endif
+          #if BUTTON_EXISTS(ENC)
+            if (BUTTON_PRESSED(ENC)) newbutton |= EN_C;
+          #endif
+          #if BUTTON_EXISTS(BACK)
+            if (BUTTON_PRESSED(BACK)) newbutton |= EN_D;
+          #endif
+
+        #else
+
+          constexpr uint8_t newbutton = 0;
+
+        #endif
+
+
+        static uint8_t buttons = newbutton;
+        static uint8_t lastEncoderBits;
+
+        #define encrot0 0
+        #define encrot1 1
+        #define encrot2 2
+
+        // Manage encoder rotation
+        //#define ENCODER_SPIN(_E1, _E2) switch (lastEncoderBits) { case _E1: enc_Direction += encoderDirection; break; case _E2: enc_Direction -= encoderDirection; }
+
+        uint8_t enc = 0;
+        if (buttons & EN_A) enc |= B01;
+        if (buttons & EN_B) enc |= B10;
+        if (enc != lastEncoderBits) {
+          switch (enc) {
+            case encrot1:
+              if (lastEncoderBits == encrot0) {
+                enc_diff--;
+                encoder_time1 = tmpTime;
+              }
+              break;
+            case encrot2:
+              if (lastEncoderBits == encrot0) {
+                enc_diff++;
+                encoder_time1 = tmpTime;
+              }
+              break;
+          }
+          lastEncoderBits = enc;
+        }
+        static uint8_t last_button_state = LV_INDEV_STATE_REL;
+        const uint8_t enc_c = (buttons & EN_C) ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+        if (enc_c != last_button_state) {
+          state = enc_c ? LV_INDEV_STATE_PR : LV_INDEV_STATE_REL;
+
+          last_button_state = enc_c;
+        }
+
+      #endif // HAS_ENCODER_WHEEL
+
+    } // next_button_update_ms
+  }
+
+#endif // HAS_ENCODER_ACTION
+
 #endif // HAS_TFT_LVGL_UI
