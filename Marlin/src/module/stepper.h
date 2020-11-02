@@ -277,7 +277,7 @@ class Stepper {
 
     // Last-moved extruder, as set when the last movement was fetched from planner
     #if EXTRUDERS < 2
-      static constexpr uint8_t last_moved_extruder = 0;
+      static constexpr uint8_t last_moved_extruder = 1;
     #elif DISABLED(MIXING_EXTRUDER)
       static uint8_t last_moved_extruder;
     #endif
