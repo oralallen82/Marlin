@@ -27,13 +27,13 @@
 
 #if NOT_TARGET(__STM32F1__)
   #error "Oops! Select an STM32F1 board in 'Tools > Board.'"
-#elif HOTENDS > 2 || E_STEPPERS > 2
-  #error "MKS Robin nano supports up to 2 hotends / E-steppers. Comment out this line to continue."
+#elif HOTENDS > 1 || E_STEPPERS > 1
+  #error "MKS Robin e3p supports up to 1 hotends / E-steppers. Comment out this line to continue."
 #elif HAS_FSMC_TFT
-  #error "MKS Robin nano v2 doesn't support FSMC-based TFT displays."
+  #error "MKS Robin e3p doesn't support FSMC-based TFT displays."
 #endif
 
-#define BOARD_INFO_NAME "MKS Robin nano V2.0"
+#define BOARD_INFO_NAME "MKS Robin e3p"
 
 //
 // Release PB4 (Y_ENABLE_PIN) from JTAG NRST role
@@ -65,7 +65,6 @@
 #define Y_DIAG_PIN                          PA12
 #define Z_DIAG_PIN                          PA11
 #define E0_DIAG_PIN                         PC4
-#define E1_DIAG_PIN                         PE7
 
 #define X_STOP_PIN                          PA15
 #define Y_STOP_PIN                          PA12
@@ -103,13 +102,6 @@
   #define E0_CS_PIN                         PD9
 #endif
 
-#define E1_ENABLE_PIN                       PA3
-#define E1_STEP_PIN                         PD15
-#define E1_DIR_PIN                          PA1
-#ifndef E1_CS_PIN
-  #define E1_CS_PIN                         PD8
-#endif
-
 //
 // Software SPI pins for TMC2130 stepper drivers
 //
@@ -132,11 +124,17 @@
    * Hardware serial communication ports.
    * If undefined software serial is used according to the pins below
    */
-  //#define X_HARDWARE_SERIAL  MSerial1
-  //#define Y_HARDWARE_SERIAL  MSerial1
-  //#define Z_HARDWARE_SERIAL  MSerial1
-  //#define E0_HARDWARE_SERIAL MSerial1
-  //#define E1_HARDWARE_SERIAL MSerial1
+  //#define X_HARDWARE_SERIAL  Serial
+  //#define X2_HARDWARE_SERIAL Serial1
+  //#define Y_HARDWARE_SERIAL  Serial1
+  //#define Y2_HARDWARE_SERIAL Serial1
+  //#define Z_HARDWARE_SERIAL  Serial1
+  //#define Z2_HARDWARE_SERIAL Serial1
+  //#define E0_HARDWARE_SERIAL Serial1
+  //#define E1_HARDWARE_SERIAL Serial1
+  //#define E2_HARDWARE_SERIAL Serial1
+  //#define E3_HARDWARE_SERIAL Serial1
+  //#define E4_HARDWARE_SERIAL Serial1
 
   //
   // Software serial
@@ -154,9 +152,6 @@
   #define E0_SERIAL_TX_PIN                  PD9
   #define E0_SERIAL_RX_PIN                  PD9
 
-  #define E1_SERIAL_TX_PIN                  PD8
-  #define E1_SERIAL_RX_PIN                  PD8
-
   // Reduce baud rate to improve software serial reliability
   #define TMC_BAUD_RATE                    19200
 #endif // TMC2208 || TMC2209
@@ -165,23 +160,15 @@
 // Temperature Sensors
 //
 #define TEMP_0_PIN                          PC1   // TH1
-#define TEMP_1_PIN                          PC2   // TH2
 #define TEMP_BED_PIN                        PC0   // TB1
 
 //
 // Heaters / Fans
 //
 #define HEATER_0_PIN                        PC3   // HEATER1
-#define HEATER_1_PIN                        PB0   // HEATER2
 #define HEATER_BED_PIN                      PA0   // HOT BED
 
 #define FAN_PIN                             PB1   // FAN
-
-//
-// Thermocouples
-//
-//#define MAX6675_SS_PIN                    PE5   // TC1 - CS1
-//#define MAX6675_SS_PIN                    PE6   // TC2 - CS2
 
 //
 // Misc. Functions
@@ -196,7 +183,6 @@
   #endif
 
   #define MT_DET_1_PIN                      PA4   // LVGL UI FILAMENT RUNOUT1 PIN
-  #define MT_DET_2_PIN                      PE6   // LVGL UI FILAMENT RUNOUT2 PIN
   #define MT_DET_PIN_INVERTING             false  // LVGL UI filament RUNOUT PIN STATE
 
   #define WIFI_IO0_PIN                      PC13  // MKS ESP WIFI IO0 PIN
@@ -205,13 +191,12 @@
 
   #if ENABLED(MKS_TEST)
     #define MKS_TEST_POWER_LOSS_PIN         PA2   // PW_DET
-    #define MKS_TEST_PS_ON_PIN              PB2   // PW_OFF
+    #define MKS_TEST_PS_ON_PIN              PB0   // PW_OFF
   #endif
 #else
   //#define POWER_LOSS_PIN                  PA2   // PW_DET
   //#define PS_ON_PIN                       PB2   // PW_OFF
   #define FIL_RUNOUT_PIN                    PA4
-  #define FIL_RUNOUT2_PIN                   PE6
 #endif
 
 #define SERVO0_PIN                          PA8   // Enable BLTOUCH
@@ -233,6 +218,9 @@
 //
 // LCD / Controller
 //
+#ifndef BEEPER_PIN
+  #define BEEPER_PIN                        PC5
+#endif
 
 /**
  * Note: MKS Robin TFT screens use various TFT controllers.
@@ -269,11 +257,19 @@
   #define TOUCH_BUTTONS_HW_SPI
   #define TOUCH_BUTTONS_HW_SPI_DEVICE          1
 
+  #ifndef TFT_WIDTH
+    #define TFT_WIDTH                        480
+  #endif
+  #ifndef TFT_HEIGHT
+    #define TFT_HEIGHT                       320
+  #endif
+
+  #define LCD_READ_ID                       0xD3
   #define LCD_USE_DMA_SPI
 
 #endif
 
-#if ENABLED(TFT_CLASSIC_UI)
+#if ENABLED(SPI_GRAPHICAL_TFT)
   // Emulated DOGM SPI
   #ifndef GRAPHICAL_TFT_UPSCALE
     #define GRAPHICAL_TFT_UPSCALE              3
@@ -289,12 +285,13 @@
   #define LCD_PINS_ENABLE                   PD13
   #define LCD_PINS_RS                       PC6
 
-#elif ENABLED(TFT_COLOR_UI)
+#elif ENABLED(TFT_480x320_SPI)
+  #define TFT_DRIVER                      ST7796
   #define TFT_BUFFER_SIZE                  14400
 #endif
 
 // XPT2046 Touch Screen calibration
-#if EITHER(TFT_LVGL_UI, TFT_COLOR_UI)
+#if EITHER(HAS_TFT_LVGL_UI, TFT_480x320_SPI)
   #ifndef XPT2046_X_CALIBRATION
     #define XPT2046_X_CALIBRATION         -17253
   #endif
@@ -307,7 +304,7 @@
   #ifndef XPT2046_Y_OFFSET
     #define XPT2046_Y_OFFSET                 -24
   #endif
-#elif ENABLED(TFT_CLASSIC_UI)
+#elif ENABLED(SPI_GRAPHICAL_TFT)
   #ifndef XPT2046_X_CALIBRATION
     #define XPT2046_X_CALIBRATION         -11386
   #endif
@@ -338,18 +335,9 @@
     #define DOGLCD_SCK                      PA5
     #define DOGLCD_MOSI                     PA7
 
-  #elif IS_TFTGLCD_PANEL
-
-    #if ENABLED(TFTGLCD_PANEL_SPI)
-      #define PIN_SPI_SCK                   PA5
-      #define PIN_TFT_MISO                  PA6
-      #define PIN_TFT_MOSI                  PA7
-      #define TFTGLCD_CS                    PE8
-    #endif
-
-    #ifndef BEEPER_PIN
-      #define BEEPER_PIN                    -1
-    #endif
+    // Required for MKS_MINI_12864 with this board
+    #define MKS_LCD12864B
+    #undef SHOW_BOOTSCREEN
 
   #else                                           // !MKS_MINI_12864
 
@@ -381,10 +369,6 @@
   #define W25QXX_MOSI_PIN                   PB15
   #define W25QXX_MISO_PIN                   PB14
   #define W25QXX_SCK_PIN                    PB13
-#endif
-
-#ifndef BEEPER_PIN
-  #define BEEPER_PIN                        PC5
 #endif
 
 #if ENABLED(SPEAKER) && BEEPER_PIN == PC5

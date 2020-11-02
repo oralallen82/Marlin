@@ -259,6 +259,13 @@ class Stepper {
       static uint32_t motor_current_setting[MOTOR_CURRENT_COUNT]; // Initialized by settings.load()
     #endif
 
+    // Last-moved extruder, as set when the last movement was fetched from planner
+    #if HAS_MULTI_EXTRUDER
+      static uint8_t last_moved_extruder;
+    #else
+      static constexpr uint8_t last_moved_extruder = 0;
+    #endif
+
   private:
 
     static block_t* current_block;          // A pointer to the block currently being traced

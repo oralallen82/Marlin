@@ -35,6 +35,10 @@
 
   // MYSERIAL0 required before MarlinSerial includes!
 
+  #define __MSERIAL(X) Serial##X
+  #define _MSERIAL(X) __MSERIAL(X)
+  #define MSERIAL(X) _MSERIAL(INCREMENT(X))
+
   #if SERIAL_PORT == -1
     #define MYSERIAL0 Serial
   #elif SERIAL_PORT == 0

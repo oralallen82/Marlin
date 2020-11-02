@@ -217,7 +217,18 @@
  * that the garbage/lines are erased immediately after the SD card accesses are completed.
  */
 
-#if HAS_SPI_LCD
+#if IS_TFTGLCD_PANEL
+
+  #if ENABLED(TFTGLCD_PANEL_SPI)
+    #define TFTGLCD_CS                     P3_25  // EXP2.3
+  #endif
+
+  #if SD_CONNECTION_IS(LCD)
+    #define SD_DETECT_PIN                  P0_28  // EXP2.4
+  #endif
+
+#elif HAS_WIRED_LCD
+
   #define BEEPER_PIN                       P1_31  // EXP1.1
   #define BTN_ENC                          P1_30  // EXP1.2
   #define BTN_EN1                          P3_26  // EXP2.5
