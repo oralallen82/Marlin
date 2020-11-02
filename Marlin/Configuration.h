@@ -75,7 +75,7 @@
 #define CUSTOM_VERSION_FILE Version.h // Path from the root directory (no quotes)
 #define	MACVERSION		STRING_CONFIG_H_AUTHOR
 #define	SOFTVERSION		SHORT_BUILD_VERSION
-#define MAC_LENGTH              245
+#define MAC_LENGTH              250
 #define MAC_WIDTH               245
 #define MAC_HEIGHT              250
 
@@ -799,7 +799,7 @@
  * When changing speed and direction, if the difference is less than the
  * value set here, it may happen instantaneously.
  */
-#define CLASSIC_JERK
+//#define CLASSIC_JERK
 #if ENABLED(CLASSIC_JERK)
   #define DEFAULT_XJERK 10.0
   #define DEFAULT_YJERK 10.0
@@ -1135,7 +1135,7 @@
 
 // The size of the print bed
 #define X_BED_SIZE 245
-#define Y_BED_SIZE 245
+#define Y_BED_SIZE 250
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS -5
