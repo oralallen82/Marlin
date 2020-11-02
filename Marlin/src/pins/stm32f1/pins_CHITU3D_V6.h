@@ -133,15 +133,15 @@
 // TronXY TFT Support
 //
 
+// Shared FSMC Configs
 #if HAS_FSMC_TFT
-
-  // Shared FSMC
-
   #define TOUCH_CS_PIN                      PB7   // SPI1_NSS
   #define TOUCH_SCK_PIN                     PA5   // SPI1_SCK
   #define TOUCH_MISO_PIN                    PA6   // SPI1_MISO
   #define TOUCH_MOSI_PIN                    PA7   // SPI1_MOSI
 
+  #define LCD_RESET_PIN                     PF11
+  #define LCD_BACKLIGHT_PIN                 PD13
   #define TFT_RESET_PIN                     PF11
   #define TFT_BACKLIGHT_PIN                 PD13
 
@@ -151,39 +151,43 @@
   #define FSMC_DMA_DEV                      DMA2
   #define FSMC_DMA_CHANNEL               DMA_CH5
 
+  #define TFT_WIDTH                          480
+  #define TFT_HEIGHT                         320
+  #define TFT_PIXEL_OFFSET_X                  48
+  #define TFT_PIXEL_OFFSET_Y                  32
+
 #endif
 
-#if ENABLED(TFT_LVGL_UI)
-  // LVGL
+// LVGL Configs
+#if HAS_TFT_LVGL_UI
+
   #define HAS_SPI_FLASH_FONT                   1
   #define HAS_GCODE_PREVIEW                    1
   #define HAS_GCODE_DEFAULT_VIEW_IN_FLASH      0
   #define HAS_LANG_SELECT_SCREEN               1
   #define HAS_BAK_VIEW_IN_FLASH                0
   #define HAS_LOGO_IN_FLASH                    0
-#elif ENABLED(TFT_COLOR_UI)
-  // Color UI
+
+  #define XPT2046_X_CALIBRATION           -17181
+  #define XPT2046_Y_CALIBRATION            11434
+  #define XPT2046_X_OFFSET                   501
+  #define XPT2046_Y_OFFSET                    -9
+
+// Color UI Configs
+#elif ENABLED(TFT_480x320)
+
   #define TFT_DRIVER                     ILI9488
   #define TFT_BUFFER_SIZE                  14400
-#elif ENABLED(TFT_CLASSIC_UI)
-  // Emulated DOGM
+
+  #define XPT2046_X_CALIBRATION           -17181
+  #define XPT2046_Y_CALIBRATION            11434
+  #define XPT2046_X_OFFSET                   501
+  #define XPT2046_Y_OFFSET                    -9
+
+// Emulated DOGM
+#elif ENABLED(FSMC_GRAPHICAL_TFT)
   #define GRAPHICAL_TFT_UPSCALE                3
 
-// XPT2046 Touch Screen calibration
-#if EITHER(TFT_LVGL_UI, TFT_COLOR_UI)
-  #ifndef XPT2046_X_CALIBRATION
-    #define XPT2046_X_CALIBRATION         -17181
-  #endif
-  #ifndef XPT2046_Y_CALIBRATION
-    #define XPT2046_Y_CALIBRATION          11434
-  #endif
-  #ifndef XPT2046_X_OFFSET
-    #define XPT2046_X_OFFSET                 501
-  #endif
-  #ifndef XPT2046_Y_OFFSET
-    #define XPT2046_Y_OFFSET                  -9
-  #endif
-#elif ENABLED(TFT_CLASSIC_UI)
   #ifndef XPT2046_X_CALIBRATION
     #define XPT2046_X_CALIBRATION         -12316
   #endif

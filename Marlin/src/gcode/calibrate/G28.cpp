@@ -228,9 +228,8 @@ void GcodeSuite::G28() {
     return;
   }
 
-  planner.synchronize();          // Wait for planner moves to finish!
-
-  SET_SOFT_ENDSTOP_LOOSE(false);  // Reset a leftover 'loose' motion state
+  // Wait for planner moves to finish!
+  planner.synchronize();
 
   // Disable the leveling matrix before homing
   #if HAS_LEVELING
