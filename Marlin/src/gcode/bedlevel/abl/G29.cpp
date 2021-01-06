@@ -41,8 +41,13 @@
   #include "../../../module/temperature.h"
 #endif
 
+#if ENABLED(PROBING_HEATERS_OFF)
+  #include "../../../module/temperature.h"
+  #include "../../../module/printcounter.h"
+#endif
+
 #if HAS_DISPLAY
-  #include "../../../lcd/ultralcd.h"
+  #include "../../../lcd/marlinui.h"
 #endif
 
 #if ENABLED(AUTO_BED_LEVELING_LINEAR)
@@ -361,32 +366,24 @@ G29_TYPE GcodeSuite::G29() {
 
       if (parser.seen('H')) {
         const int16_t size = (int16_t)parser.value_linear_units();
-        probe_position_lf.set(
-          _MAX(X_CENTER - size / 2, x_min),
-          _MAX(Y_CENTER - size / 2, y_min)
-        );
-        probe_position_rb.set(
-          _MIN(probe_position_lf.x + size, x_max),
-          _MIN(probe_position_lf.y + size, y_max)
-        );
+        probe_position_lf.set(_MAX((X_CENTER) - size / 2, x_min), _MAX((Y_CENTER) - size / 2, y_min));
+        probe_position_rb.set(_MIN(probe_position_lf.x + size, x_max), _MIN(probe_position_lf.y + size, y_max));
       }
       else {
-        probe_position_lf.set(
-          parser.seenval('L') ? RAW_X_POSITION(parser.value_linear_units()) : x_min,
-          parser.seenval('F') ? RAW_Y_POSITION(parser.value_linear_units()) : y_min
-        );
-        probe_position_rb.set(
-          parser.seenval('R') ? RAW_X_POSITION(parser.value_linear_units()) : x_max,
-          parser.seenval('B') ? RAW_Y_POSITION(parser.value_linear_units()) : y_max
-        );
+        probe_position_lf.set(parser.linearval('L', x_min), parser.linearval('F', y_min));
+        probe_position_rb.set(parser.linearval('R', x_max), parser.linearval('B', y_max));
       }
 
       if (!probe.good_bounds(probe_position_lf, probe_position_rb)) {
+        if (DEBUGGING(LEVELING)) {
+          DEBUG_ECHOLNPAIR("G29 L", probe_position_lf.x, " R", probe_position_rb.x,
+                              " F", probe_position_lf.y, " B", probe_position_rb.y);
+        }
         SERIAL_ECHOLNPGM("? (L,R,F,B) out of bounds.");
         G29_RETURN(false);
       }
 
-      // probe at the points of a lattice grid
+      // Probe at the points of a lattice grid
       gridSpacing.set((probe_position_rb.x - probe_position_lf.x) / (abl_grid_points.x - 1),
                       (probe_position_rb.y - probe_position_lf.y) / (abl_grid_points.y - 1));
 
@@ -400,7 +397,18 @@ G29_TYPE GcodeSuite::G29() {
 
     planner.synchronize();
 
-    if (!faux) remember_feedrate_scaling_off();
+    #if ENABLED(AUTO_BED_LEVELING_3POINT)
+      if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("> 3-point Leveling");
+      points[0].z = points[1].z = points[2].z = 0;  // Probe at 3 arbitrary points
+    #endif
+
+    if (!faux) {
+      remember_feedrate_scaling_off();
+
+      #if ENABLED(PREHEAT_BEFORE_LEVELING)
+        if (!dryrun) probe.preheat_for_probing(LEVELING_NOZZLE_TEMP, LEVELING_BED_TEMP);
+      #endif
+    }
 
     // Disable auto bed leveling during G29.
     // Be formal so G29 can be done successively without G28.
@@ -417,7 +425,6 @@ G29_TYPE GcodeSuite::G29() {
     #endif
 
     #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-
       if (TERN1(PROBE_MANUALLY, !no_action)
         && (gridSpacing != bilinear_grid_spacing || probe_position_lf != bilinear_start)
       ) {
@@ -431,17 +438,7 @@ G29_TYPE GcodeSuite::G29() {
         // Can't re-enable (on error) until the new grid is written
         abl_should_enable = false;
       }
-
     #endif // AUTO_BED_LEVELING_BILINEAR
-
-    #if ENABLED(AUTO_BED_LEVELING_3POINT)
-
-      if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("> 3-point Leveling");
-
-      // Probe at 3 arbitrary points
-      points[0].z = points[1].z = points[2].z = 0;
-
-    #endif // AUTO_BED_LEVELING_3POINT
 
   } // !g29_in_progress
 
@@ -510,6 +507,7 @@ G29_TYPE GcodeSuite::G29() {
 
         const float newz = measured_z + zoffset;
         z_values[meshCount.x][meshCount.y] = newz;
+
         TERN_(EXTENSIBLE_UI, ExtUI::onMeshUpdate(meshCount, newz));
 
         if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPAIR_P(PSTR("Save X"), meshCount.x, SP_Y_STR, meshCount.y, SP_Z_STR, measured_z + zoffset);
@@ -591,13 +589,21 @@ G29_TYPE GcodeSuite::G29() {
 
   #else // !PROBE_MANUALLY
   {
+
+    #if BOTH(AUTO_BED_LEVELING_BILINEAR, EXTENSIBLE_UI)
+      ExtUI::onMeshLevelingStart();
+    #endif
+
     const ProbePtRaise raise_after = parser.boolval('E') ? PROBE_PT_STOW : PROBE_PT_RAISE;
 
     measured_z = 0;
 
     #if ABL_GRID
-
-      bool zig = PR_OUTER_END & 1;  // Always end at RIGHT and BACK_PROBE_BED_POSITION
+      #if ENABLED(DGUS_LCD_UI_CREALITY_TOUCH)
+        bool zig = 1;
+      #else
+        bool zig = (PR_OUTER_END & 1); // Always end at RIGHT and BACK_PROBE_BED_POSITION
+      #endif
 
       measured_z = 0;
 
@@ -664,8 +670,9 @@ G29_TYPE GcodeSuite::G29() {
 
           #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
 
-            z_values[meshCount.x][meshCount.y] = measured_z + zoffset;
-            TERN_(EXTENSIBLE_UI, ExtUI::onMeshUpdate(meshCount, z_values[meshCount.x][meshCount.y]));
+            const float z = measured_z + zoffset;
+            z_values[meshCount.x][meshCount.y] = z;
+            TERN_(EXTENSIBLE_UI, ExtUI::onMeshUpdate(meshCount, z));
 
           #endif
 
@@ -892,6 +899,17 @@ G29_TYPE GcodeSuite::G29() {
   #endif
 
   report_current_position();
+
+#if ENABLED(PROBING_HEATERS_OFF)
+  // If we're going to print then we must ensure we are back on temperature before we continue
+  if (queue.has_commands_queued() || planner.has_blocks_queued() || print_job_timer.isRunning()) {
+    SERIAL_ECHOLN("Waiting to heat-up again before continueing");
+    ui.set_status("Waiting for heat-up...");
+
+    thermalManager.wait_for_hotend(0);
+    thermalManager.wait_for_bed_heating();
+  }
+#endif
 
   G29_RETURN(isnan(measured_z));
 }
