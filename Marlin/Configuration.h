@@ -502,9 +502,9 @@
     #define DEFAULT_Ki_LIST {   1.08,   1.08 }
     #define DEFAULT_Kd_LIST { 114.00, 114.00 }
   #else
-    #define DEFAULT_Kp  28.38
-    #define DEFAULT_Ki   2.77
-    #define DEFAULT_Kd 72.79
+    #define DEFAULT_Kp  28.27 //OA 28.38
+    #define DEFAULT_Ki  2.66  //OA 2.77
+    #define DEFAULT_Kd 75.05 //OA 72.79
   #endif
 #endif // PIDTEMP
 
@@ -989,7 +989,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { -46, -12, -1.89} //OA Z -1.60 Glass Bed
+#define NOZZLE_TO_PROBE_OFFSET { -46, -12, -2.48} //OA Z -1.60 Glass Bed -46, -12, -1.89
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -1129,8 +1129,8 @@
 #define Y_BED_SIZE 235
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
-#define X_MIN_POS 0
-#define Y_MIN_POS 0
+#define X_MIN_POS -5 //0
+#define Y_MIN_POS -10 //0
 #define Z_MIN_POS 0
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
@@ -1187,7 +1187,7 @@
   // After a runout is detected, continue printing this length of filament
   // before executing the runout script. Useful for a sensor at the end of
   // a feed tube. Requires 4 bytes SRAM per sensor, plus 4 bytes overhead.
-  #define FILAMENT_RUNOUT_DISTANCE_MM 280
+  #define FILAMENT_RUNOUT_DISTANCE_MM 600
 
   #ifdef FILAMENT_RUNOUT_DISTANCE_MM
     // Enable this option to use an encoder disc that toggles the runout pin
