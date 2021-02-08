@@ -575,7 +575,7 @@
  * Note: For Bowden Extruders make this large enough to allow load/unload.
  */
 #define PREVENT_LENGTHY_EXTRUDE
-#define EXTRUDE_MAXLENGTH 600 //OA
+#define EXTRUDE_MAXLENGTH 100 //OA
 
 //===========================================================================
 //======================== Thermal Runaway Protection =======================
@@ -989,7 +989,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { -46, -12, -2.65} //OA Z -1.60 Glass Bed -46, -12, -1.89
+#define NOZZLE_TO_PROBE_OFFSET { -46, -12, -2.52} //OA Z -1.60 Glass Bed -46, -12, -1.89
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -1505,17 +1505,17 @@
 
 // Preheat Constants
 #define PREHEAT_1_LABEL       "PLA"
-#define PREHEAT_1_TEMP_HOTEND 200
+#define PREHEAT_1_TEMP_HOTEND 205
 #define PREHEAT_1_TEMP_BED     55 //OA
 #define PREHEAT_1_FAN_SPEED   0 // Value from 0 to 255
 
-#define PREHEAT_2_LABEL       "ABS"
+#define PREHEAT_2_LABEL       "PETG"
 #define PREHEAT_2_TEMP_HOTEND 240
-#define PREHEAT_2_TEMP_BED     90 //OA
+#define PREHEAT_2_TEMP_BED     80 //OA
 #define PREHEAT_2_FAN_SPEED   0 // Value from 0 to 255
 
 #define PREHEAT_3_LABEL       "Nozzle"
-#define PREHEAT_3_TEMP_HOTEND 250
+#define PREHEAT_3_TEMP_HOTEND 240
 #define PREHEAT_3_TEMP_BED     0 //OA
 #define PREHEAT_3_FAN_SPEED   0 // Value from 0 to 255
 
@@ -2362,7 +2362,7 @@
 #endif
 
 // Support for Adafruit Neopixel LED driver
-#define NEOPIXEL_LED //OA
+//#define NEOPIXEL_LED //OA
 #if ENABLED(NEOPIXEL_LED)
   #define NEOPIXEL_TYPE   NEO_GRB   // NEO_GRB / NEO_GRBW - four/three channel driver type (defined in Adafruit_NeoPixel.h)
   #define NEOPIXEL_PIN     P2_00       // LED driving pin
