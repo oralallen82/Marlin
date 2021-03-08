@@ -2043,7 +2043,7 @@
  *
  * Note that M207 / M208 / M209 settings are saved to EEPROM.
  */
-#define FWRETRACT //OA
+//#define FWRETRACT //OA
 #if ENABLED(FWRETRACT)
   #define FWRETRACT_AUTORETRACT           // Override slicer retractions
   #define FWRETRACT_AUTORESET             // Automatically reset firmware retract and do not save this setting
